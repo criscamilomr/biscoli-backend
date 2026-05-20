@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS orders (
     currency VARCHAR(10) NOT NULL DEFAULT 'COP',
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING', -- PENDING, APPROVED, DECLINED, ERROR
     customer_email VARCHAR(255),               -- Email del cliente
+    order_details JSONB,                       -- Detalles del pedido (nombre, dirección, items)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
