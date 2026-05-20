@@ -26,23 +26,32 @@ services:
       - db
     restart: unless-stopped
 
-#   api:
-#     build: .
-#     container_name: biscoli_api
-#     environment:
-#       # Depend on db service and use its container name as host
-#       DATABASE_URL: postgres://postgres:postgres@db:5432/biscoli
-#       WOMPI_ENVIRONMENT: sandbox
-#       # Reemplaza estas llaves con tus valores de Wompi reales cuando corras el contenedor
-#       WOMPI_PRIVATE_KEY: ${WOMPI_PRIVATE_KEY:-}
-#       WOMPI_PUBLIC_KEY: ${WOMPI_PUBLIC_KEY:-}
-#       WOMPI_INTEGRITY_SECRET: ${WOMPI_INTEGRITY_SECRET:-}
-#       WOMPI_EVENTS_SECRET: ${WOMPI_EVENTS_SECRET:-}
-#     ports:
-#       - "8080:8080"
-#     depends_on:
-#       - db
-#     restart: unless-stopped
+  api:
+    build: .
+    container_name: biscoli_api
+    environment:
+      # Depend on db service and use its container name as host
+      DATABASE_URL: postgres://postgres:postgres@db:5432/biscoli
+      WOMPI_ENVIRONMENT: sandbox
+      # Reemplaza estas llaves con tus valores de Wompi reales cuando corras el contenedor
+      WOMPI_PRIVATE_KEY: ${WOMPI_PRIVATE_KEY:-}
+      WOMPI_PUBLIC_KEY: ${WOMPI_PUBLIC_KEY:-}
+      WOMPI_INTEGRITY_SECRET: ${WOMPI_INTEGRITY_SECRET:-}
+      WOMPI_EVENTS_SECRET: ${WOMPI_EVENTS_SECRET:-}
+      # Email Notifications
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      NOTIFICATION_EMAIL: ${NOTIFICATION_EMAIL:-}
+      # Telegram Notifications
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    restart: unless-stopped
 
 volumes:
   postgres_data:
