@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -178,6 +179,27 @@ func (h *PaymentHandler) HandleGetPaymentStatus(w http.ResponseWriter, r *http.R
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to get transaction status: %v", err), http.StatusInternalServerError)
 		return
+	}
+
+	// Fallback/Local Development: Check database status and send notification if APPROVED but still marked PENDING in DB.
+	// Since Wompi webhooks cannot reach localhost, this serves as the primary mechanism for local testing.
+	order, err := h.db.GetOrderByReference(r.Context(), transactionResp.Data.Reference)
+	if err == nil && order != nil {
+		if order.Status == "PENDING" && transactionResp.Data.Status != "PENDING" {
+			txStatus := transactionResp.Data.Status
+			reference := transactionResp.Data.Reference
+
+			log.Printf("Sondeo de transacción final detectado. Referencia: %s | Estado: %s. Actualizando DB.\n", reference, txStatus)
+			
+			// Update status in DB
+			_ = h.db.UpdateOrderStatusByReference(r.Context(), reference, txStatus)
+
+			// If APPROVED, trigger notifications
+			if txStatus == "APPROVED" {
+				log.Println("✅ ¡Pago aprobado detectado por sondeo! Enviando notificaciones...")
+				go h.sendOrderNotifications(reference, transactionResp.Data.AmountInCents)
+			}
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
